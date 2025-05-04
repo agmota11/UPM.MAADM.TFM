@@ -13,7 +13,7 @@ import json
 import os
 from datetime import datetime
 
-DATA_BASE_DIRECTORY = '/home/agmota/ros2_ws/UPM.MAADM.TFM/car_controller/data'
+DATA_BASE_DIRECTORY = '/home/agmota/ros2_ws/UPM.MAADM.TFM/data'
 
 class CarStateLogger(Node):
     def __init__(self):
