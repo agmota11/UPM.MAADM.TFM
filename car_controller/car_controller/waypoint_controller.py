@@ -89,7 +89,11 @@ class WaypointController(Node):
 
         # Publish the next self.num_waypoints waypoints
         self.current_waypoints = self.waypoints[self.current_waypoint_index:self.current_waypoint_index + self.num_waypoints]
-        if len(self.current_waypoints) == 1:
+        if len(self.current_waypoints) < self.num_waypoints:
+            remaining = self.num_waypoints - len(self.current_waypoints)
+            self.current_waypoints += self.waypoints[1:remaining+1]
+
+        if self.current_waypoint_index > len(self.waypoints):
             self.get_logger().info('No waypoints to publish.')
             self.waypoint_publisher.publish(Float32MultiArray())
             return
@@ -122,6 +126,10 @@ class WaypointController(Node):
 
         # Plot the next self.num_waypoints waypoints
         waypoints_to_plot = self.waypoints[self.current_waypoint_index:self.current_waypoint_index + self.num_waypoints]
+        if len(waypoints_to_plot) < self.num_waypoints:
+            remaining = self.num_waypoints - len(waypoints_to_plot)
+            waypoints_to_plot += self.waypoints[1:remaining+1]
+
         waypoint_lats = [wp[0] for wp in waypoints_to_plot]
         waypoint_lons = [wp[1] for wp in waypoints_to_plot]
         self.ax.plot(waypoint_lons, waypoint_lats, 'bo-', label='Next Waypoints')

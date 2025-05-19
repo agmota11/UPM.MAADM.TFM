@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'car_state_logger = car_controller.car_state_logger:main',
             'waypoint_controller = car_controller.waypoint_controller:main',
+            'sim_car_controller = car_controller.sim_car_controller:main',
         ],
     },
 )
