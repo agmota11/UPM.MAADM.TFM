@@ -1,0 +1,2 @@
+Name,Mean lateral error,Max lateral error,Acc lateral error,RMSE lateral error,Std lateral error,Off-path rate (>0.5m),Area Between Curves (ABC)
+sample,0.4405678146842314,1.1221671448515091,161.24782017442868,0.5475542440674249,0.32513943295240266,0.4344262295081967,44.617160646094554

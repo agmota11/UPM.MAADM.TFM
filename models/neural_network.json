@@ -1,7 +1,7 @@
 {
     "class_name": "Sequential",
     "config": {
-        "name": "sequential_1",
+        "name": "sequential",
         "layers": [
             {
                 "class_name": "InputLayer",
@@ -13,13 +13,13 @@
                     "dtype": "float32",
                     "sparse": false,
                     "ragged": false,
-                    "name": "batch_normalization_1_input"
+                    "name": "batch_normalization_input"
                 }
             },
             {
                 "class_name": "BatchNormalization",
                 "config": {
-                    "name": "batch_normalization_1",
+                    "name": "batch_normalization",
                     "trainable": true,
                     "batch_input_shape": [
                         null,
@@ -56,32 +56,13 @@
                 }
             },
             {
-                "class_name": "Reshape",
+                "class_name": "Dense",
                 "config": {
-                    "name": "reshape_1",
+                    "name": "dense",
                     "trainable": true,
                     "dtype": "float32",
-                    "target_shape": [
-                        9,
-                        2
-                    ]
-                }
-            },
-            {
-                "class_name": "LSTM",
-                "config": {
-                    "name": "lstm_1",
-                    "trainable": true,
-                    "dtype": "float32",
-                    "return_sequences": false,
-                    "return_state": false,
-                    "go_backwards": false,
-                    "stateful": false,
-                    "unroll": false,
-                    "time_major": false,
-                    "units": 128,
-                    "activation": "tanh",
-                    "recurrent_activation": "sigmoid",
+                    "units": 256,
+                    "activation": "relu",
                     "use_bias": true,
                     "kernel_initializer": {
                         "class_name": "GlorotUniform",
@@ -89,10 +70,29 @@
                             "seed": null
                         }
                     },
-                    "recurrent_initializer": {
-                        "class_name": "Orthogonal",
+                    "bias_initializer": {
+                        "class_name": "Zeros",
+                        "config": {}
+                    },
+                    "kernel_regularizer": null,
+                    "bias_regularizer": null,
+                    "activity_regularizer": null,
+                    "kernel_constraint": null,
+                    "bias_constraint": null
+                }
+            },
+            {
+                "class_name": "Dense",
+                "config": {
+                    "name": "dense_1",
+                    "trainable": true,
+                    "dtype": "float32",
+                    "units": 128,
+                    "activation": "relu",
+                    "use_bias": true,
+                    "kernel_initializer": {
+                        "class_name": "GlorotUniform",
                         "config": {
-                            "gain": 1.0,
                             "seed": null
                         }
                     },
@@ -100,17 +100,11 @@
                         "class_name": "Zeros",
                         "config": {}
                     },
-                    "unit_forget_bias": true,
                     "kernel_regularizer": null,
-                    "recurrent_regularizer": null,
                     "bias_regularizer": null,
                     "activity_regularizer": null,
                     "kernel_constraint": null,
-                    "recurrent_constraint": null,
-                    "bias_constraint": null,
-                    "dropout": 0.0,
-                    "recurrent_dropout": 0.0,
-                    "implementation": 2
+                    "bias_constraint": null
                 }
             },
             {
