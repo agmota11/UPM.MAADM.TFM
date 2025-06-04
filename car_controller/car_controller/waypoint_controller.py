@@ -6,6 +6,8 @@ from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import Float32MultiArray
 import csv
 import matplotlib.pyplot as plt
+from ackermann_msgs.msg import AckermannDriveStamped
+
 
 class WaypointController(Node):
     def __init__(self):
@@ -32,6 +34,14 @@ class WaypointController(Node):
             self.gps_callback,
             qos
         )
+                # Subscribe to /cmd for steering angle
+        self.subscription_cmd = self.create_subscription(
+            AckermannDriveStamped,
+            '/cmd',
+            self.cmd_callback,
+            qos
+        )
+        self.latest_steering_angle = 0.0
 
         # Publisher to /waypoints
         self.waypoint_publisher = self.create_publisher(Float32MultiArray, '/waypoints', 10)
@@ -40,7 +50,7 @@ class WaypointController(Node):
         self.timer = self.create_timer(0.5, self.timer_callback)
 
         self.latest_gps = None
-        self.get_logger().info('WaypointNavigator has been started.')
+        self.get_logger().info(f'WaypointNavigator has been started. {self.radius=}')
 
         # Initialize plot
         self.fig, self.ax = plt.subplots()
@@ -60,35 +70,47 @@ class WaypointController(Node):
     def gps_callback(self, msg):
         self.latest_gps = msg
 
+    
+    def cmd_callback(self, msg):
+        self.latest_steering_angle = msg.drive.steering_angle
+
     def timer_callback(self):
         if self.latest_gps is None:
             self.get_logger().warn('No GPS data received yet.')
             return
 
         # Get the current waypoint
-        if self.current_waypoint_index >= len(self.waypoints):
-            self.get_logger().info('All waypoints have been reached.')
+        if self.current_waypoint_index >= len(self.waypoints) + 1:
+            self.get_logger().info(f'All waypoints have been reached. {self.current_waypoint_index}/{len(self.waypoints) + 1}')
+            self.waypoint_publisher.publish(Float32MultiArray())
             return
 
-        current_waypoint = self.waypoints[self.current_waypoint_index]
+        current_index = self.current_waypoint_index % len(self.waypoints)
+        current_waypoint = self.waypoints[current_index]
+        next_waypoint = self.waypoints[self.current_waypoint_index + 1] if self.current_waypoint_index + 1 < len(self.waypoints) else self.waypoints[0]
 
         # Check if the car is within the radius of the current waypoint
         car_lat = self.latest_gps.latitude
         car_lon = self.latest_gps.longitude
         waypoint_lat = current_waypoint[0]
         waypoint_lon = current_waypoint[1]
+        next_waypoint_lat = next_waypoint[0]
+        next_waypoint_lon = next_waypoint[1]
 
         distance = self.calculate_distance(car_lat, car_lon, waypoint_lat, waypoint_lon)
+        next_distance = self.calculate_distance(car_lat, car_lon, next_waypoint_lat, next_waypoint_lon)
 
-        if distance <= self.radius:
+        if distance <= self.radius or next_distance <= distance + 1e-6:
             self.get_logger().info(f'Waypoint {self.current_waypoint_index} reached. Advancing to the next waypoint.')
             self.current_waypoint_index += 1
-            if self.current_waypoint_index >= len(self.waypoints):
-                self.get_logger().info('All waypoints have been reached.')
-                return
+        
+        if self.current_waypoint_index >= len(self.waypoints) + 1:
+            self.get_logger().info(f'All waypoints have been reached. {self.current_waypoint_index}/{len(self.waypoints) + 1}')
+            self.waypoint_publisher.publish(Float32MultiArray())
+            return
 
         # Publish the next self.num_waypoints waypoints
-        self.current_waypoints = self.waypoints[self.current_waypoint_index:self.current_waypoint_index + self.num_waypoints]
+        self.current_waypoints = self.waypoints[current_index:current_index + self.num_waypoints]
         if len(self.current_waypoints) < self.num_waypoints:
             remaining = self.num_waypoints - len(self.current_waypoints)
             self.current_waypoints += self.waypoints[1:remaining+1]
@@ -101,7 +123,7 @@ class WaypointController(Node):
         path_msg = Float32MultiArray()
         path_msg.data = [coord for waypoint in self.current_waypoints for coord in waypoint]  # Flatten the list
         self.waypoint_publisher.publish(path_msg)
-        self.get_logger().info(f'Published waypoints: {len(self.current_waypoints)}')
+        self.get_logger().info(f'Published waypoints: {self.current_waypoint_index}/{len(self.waypoints) + 1}')
 
         # Plot the current position and waypoints
         self.plot_position_and_waypoints(car_lat, car_lon)
@@ -137,7 +159,6 @@ class WaypointController(Node):
         # Plot the car's current position
         self.ax.plot(car_lon, car_lat, 'ro', label='Current Position')
 
-        # Add labels and legend
         # Plot all waypoints with 0.1 alpha
         all_waypoint_lats = [wp[0] for wp in self.waypoints]
         all_waypoint_lons = [wp[1] for wp in self.waypoints]
@@ -145,6 +166,11 @@ class WaypointController(Node):
         self.ax.set_xlabel('Longitude')
         self.ax.set_ylabel('Latitude')
         self.ax.legend()
+
+        # Annotate steering angle
+        self.ax.text(0.05, 0.95, f"Steering Angle: {self.latest_steering_angle:.3f}",
+                     transform=self.ax.transAxes, fontsize=10, verticalalignment='top',
+                     bbox=dict(boxstyle="round", fc="w", ec="0.5", alpha=0.9))
 
         # Update the plot
         self.fig.canvas.draw()

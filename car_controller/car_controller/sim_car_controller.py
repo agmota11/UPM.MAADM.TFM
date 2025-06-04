@@ -15,10 +15,29 @@ class SimCarController(Node):
         super().__init__('sim_car_controller')
 
         # Paths to the JSON and weights files
-        json_file_path = '/home/agmota/ros2_ws/UPM.MAADM.TFM/models/nn_512_256_128_64.json'
-        weights_file_path = '/home/agmota/ros2_ws/UPM.MAADM.TFM/weights/best_NN_20250506_180829.h5'
+        base_path = '/home/agmota/ros2_ws/UPM.MAADM.TFM'
+        model_name = 'transformer_2_32_128_64'
+        json_file_path = f'{base_path}/models/{model_name}.json'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_123131.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_133040.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_133331.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_141150.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_171134.h5'
+        weights_file_path = f'{base_path}/weights/best_NN_20250602_183945.h5'
+    
+        # model_name = 'nn_512_256_128_64'
+        # json_file_path = f'{base_path}/models/{model_name}.json'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_122925.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_132939.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_133219.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_140819.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250601_170918.h5'
+        # weights_file_path = f'{base_path}/weights/best_NN_20250602_183248.h5'
 
         self.model = self.load_model_from_json(json_file_path, weights_file_path)
+
+        self.counter = 20
+        self.max_steering_angle = 0.4
 
         # Subscriber to /waypoints topic
         self.subscription_waypoints = self.create_subscription(
@@ -97,6 +116,12 @@ class SimCarController(Node):
             self.cmd_publisher.publish(self.build_ackermann_msg(0.0, 0.0))
             return
         
+        if self.counter > 0:
+            self.get_logger().warn('Initial steps')
+            self.cmd_publisher.publish(self.build_ackermann_msg(self.car_velocity, 0.0))
+            self.counter -= 1
+            return
+
         # Transform waypoints to local coordinates
         waypoints_global = [(self.waypoints[i], self.waypoints[i + 1]) for i in range(0, len(self.waypoints), 2)]
         local_waypoints = calculate_local_coordinates(self.latest_gps.latitude, self.latest_gps.longitude, waypoints_global)
@@ -107,10 +132,11 @@ class SimCarController(Node):
         input_data = tf.convert_to_tensor([local_waypoints_flattened], dtype=tf.float32)
         pred = self.model.predict(input_data)
         predicted_steering_angle = float(pred[0][0])
+        predicted_steering_angle = max(min(predicted_steering_angle, self.max_steering_angle), -self.max_steering_angle)
 
         # Publish the predicted steering angle
         self.cmd_publisher.publish(self.build_ackermann_msg(self.car_velocity, predicted_steering_angle))
-        self.get_logger().info(f'Published to /cmd: speed={self.car_velocity} km/h, steering_angle={predicted_steering_angle}')
+        self.get_logger().info(f'Published to /cmd: speed={self.car_velocity:.2f} km/h, steering_angle={predicted_steering_angle:.4f}')
 
 # Initialize Geod object for coordinate transformations
 geod = Geod(ellps="WGS84")
