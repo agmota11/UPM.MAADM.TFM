@@ -8,107 +8,19 @@
                 "config": {
                     "batch_input_shape": [
                         null,
-                        18
+                        18,
+                        1
                     ],
                     "dtype": "float32",
                     "sparse": false,
                     "ragged": false,
-                    "name": "batch_normalization_input"
-                }
-            },
-            {
-                "class_name": "BatchNormalization",
-                "config": {
-                    "name": "batch_normalization",
-                    "trainable": true,
-                    "batch_input_shape": [
-                        null,
-                        18
-                    ],
-                    "dtype": "float32",
-                    "axis": [
-                        1
-                    ],
-                    "momentum": 0.99,
-                    "epsilon": 0.001,
-                    "center": true,
-                    "scale": true,
-                    "beta_initializer": {
-                        "class_name": "Zeros",
-                        "config": {}
-                    },
-                    "gamma_initializer": {
-                        "class_name": "Ones",
-                        "config": {}
-                    },
-                    "moving_mean_initializer": {
-                        "class_name": "Zeros",
-                        "config": {}
-                    },
-                    "moving_variance_initializer": {
-                        "class_name": "Ones",
-                        "config": {}
-                    },
-                    "beta_regularizer": null,
-                    "gamma_regularizer": null,
-                    "beta_constraint": null,
-                    "gamma_constraint": null
-                }
-            },
-            {
-                "class_name": "Reshape",
-                "config": {
-                    "name": "reshape",
-                    "trainable": true,
-                    "dtype": "float32",
-                    "target_shape": [
-                        9,
-                        2
-                    ]
+                    "name": "input_1"
                 }
             },
             {
                 "class_name": "Conv1D",
                 "config": {
                     "name": "conv1d",
-                    "trainable": true,
-                    "dtype": "float32",
-                    "filters": 128,
-                    "kernel_size": [
-                        6
-                    ],
-                    "strides": [
-                        1
-                    ],
-                    "padding": "valid",
-                    "data_format": "channels_last",
-                    "dilation_rate": [
-                        1
-                    ],
-                    "groups": 1,
-                    "activation": "relu",
-                    "use_bias": true,
-                    "kernel_initializer": {
-                        "class_name": "GlorotUniform",
-                        "config": {
-                            "seed": null
-                        }
-                    },
-                    "bias_initializer": {
-                        "class_name": "Zeros",
-                        "config": {}
-                    },
-                    "kernel_regularizer": null,
-                    "bias_regularizer": null,
-                    "activity_regularizer": null,
-                    "kernel_constraint": null,
-                    "bias_constraint": null
-                }
-            },
-            {
-                "class_name": "Conv1D",
-                "config": {
-                    "name": "conv1d_1",
                     "trainable": true,
                     "dtype": "float32",
                     "filters": 64,
@@ -144,12 +56,51 @@
                 }
             },
             {
-                "class_name": "Flatten",
+                "class_name": "Conv1D",
                 "config": {
-                    "name": "flatten",
+                    "name": "conv1d_1",
                     "trainable": true,
                     "dtype": "float32",
-                    "data_format": "channels_last"
+                    "filters": 32,
+                    "kernel_size": [
+                        3
+                    ],
+                    "strides": [
+                        1
+                    ],
+                    "padding": "valid",
+                    "data_format": "channels_last",
+                    "dilation_rate": [
+                        1
+                    ],
+                    "groups": 1,
+                    "activation": "relu",
+                    "use_bias": true,
+                    "kernel_initializer": {
+                        "class_name": "GlorotUniform",
+                        "config": {
+                            "seed": null
+                        }
+                    },
+                    "bias_initializer": {
+                        "class_name": "Zeros",
+                        "config": {}
+                    },
+                    "kernel_regularizer": null,
+                    "bias_regularizer": null,
+                    "activity_regularizer": null,
+                    "kernel_constraint": null,
+                    "bias_constraint": null
+                }
+            },
+            {
+                "class_name": "GlobalAveragePooling1D",
+                "config": {
+                    "name": "global_average_pooling1d",
+                    "trainable": true,
+                    "dtype": "float32",
+                    "data_format": "channels_last",
+                    "keepdims": false
                 }
             },
             {
