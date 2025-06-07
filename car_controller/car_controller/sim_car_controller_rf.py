@@ -6,23 +6,21 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 from ackermann_msgs.msg import AckermannDriveStamped
 from sensor_msgs.msg import NavSatFix
-import tensorflow as tf
-from tensorflow.keras.models import model_from_json
 from pyproj import Geod
 import numpy as np
-from car_controller.models import get_model_info
+import pandas as pd
+import joblib
 
-class SimCarController(Node):
+class SimCarControllerRf(Node):
     def __init__(self):
-        super().__init__('sim_car_controller')
+        super().__init__('sim_car_controller_rf')
 
-        model_info = get_model_info('transformer_with_positional_encoding')
-        json_file_path = model_info.json_path
-        weights_file_path = model_info.weights_path
-        
-        self.get_logger().info(f'Loading {model_info.model_name} from {json_file_path} and weights from {weights_file_path}')
+        # Load Random Forest model
+        rf_model_path = '/home/agmota/ros2_ws/UPM.MAADM.TFM/models/random_forest_regressor.gz'
+        self.get_logger().info(f'Loading Random Forest model from {rf_model_path}')
         sleep(3) # to watch log messages in the terminal
-        self.model = self.load_model_from_json(json_file_path, weights_file_path)
+        self.model = joblib.load(rf_model_path)
+        self.get_logger().info("Random Forest model loaded successfully.")
 
         self.counter = 20
         self.max_steering_angle = 0.4
@@ -54,20 +52,6 @@ class SimCarController(Node):
         self.latest_gps = None
         self.get_logger().info('SimCarController has been started.')
 
-    def load_model_from_json(self, json_file_path, weights_file_path):
-        # Load JSON file
-        with open(json_file_path, 'r') as json_file:
-            model_json = json_file.read()
-
-        # Create the model from the JSON configuration
-        model = model_from_json(model_json)
-
-        # Load weights into the model
-        model.load_weights(weights_file_path)
-
-        self.get_logger().info("Model loaded successfully from JSON and weights file.")
-        return model
-
     def build_ackermann_msg(self, velocity_in_km_s, steering_angle):
         # Convert from km/h to m/s
         velocity_meters_per_second = velocity_in_km_s / 3.6
@@ -83,14 +67,12 @@ class SimCarController(Node):
         return ack_msg
 
     def waypoints_callback(self, msg):
-        # Log the received waypoints
         waypoints = msg.data
         if not waypoints:
             self.get_logger().info('No waypoints received.')
         self.waypoints = waypoints
 
     def gps_callback(self, msg):
-        # Update the latest GPS position
         self.latest_gps = msg
 
     def timer_callback(self):
@@ -117,9 +99,11 @@ class SimCarController(Node):
 
         # Trim excess waypoints if there are more than 9
         local_waypoints_flattened = local_waypoints_flattened[:18]
-        input_data = tf.convert_to_tensor([local_waypoints_flattened], dtype=tf.float32)
-        pred = self.model.predict(input_data)
-        predicted_steering_angle = float(pred[0][0])
+        # Use list comprehension to generate feature names
+        feature_names = [f'waypoint{i}_{coord}' for i in range(1, 10) for coord in ['lat', 'lon']]
+        input_df = pd.DataFrame([local_waypoints_flattened], columns=feature_names)
+        pred = self.model.predict(input_df)
+        predicted_steering_angle = float(pred[0])
         predicted_steering_angle = max(min(predicted_steering_angle, self.max_steering_angle), -self.max_steering_angle)
 
         # Publish the predicted steering angle
@@ -136,12 +120,11 @@ def calculate_local_coordinates(lat, lon, waypoints):
         x = distance * np.cos(np.radians(azimuth))
         y = distance * np.sin(np.radians(azimuth))
         local_coords.append((x, y))
-
     return local_coords
 
 def main(args=None):
     rclpy.init(args=args)
-    node = SimCarController()
+    node = SimCarControllerRf()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
