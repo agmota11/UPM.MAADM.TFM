@@ -23,7 +23,7 @@ class SimCarControllerRf(Node):
         self.get_logger().info("Random Forest model loaded successfully.")
 
         self.counter = 20
-        self.max_steering_angle = 0.4
+        self.max_steering_angle = 0.25
 
         # Subscriber to /waypoints topic
         self.subscription_waypoints = self.create_subscription(
