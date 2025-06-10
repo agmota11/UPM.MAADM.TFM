@@ -16,11 +16,12 @@ class SimCarController(Node):
     def __init__(self):
         super().__init__('sim_car_controller')
 
-        model_info = get_model_info('transformer_dql')
+        model_key = 'transformer_dql2'
+        model_info = get_model_info(model_key)
         json_file_path = model_info.json_path
         weights_file_path = model_info.weights_path
         
-        self.get_logger().info(f'Loading {model_info.model_name} from {json_file_path} and weights from {weights_file_path}')
+        self.get_logger().info(f'Loading {model_key} from {json_file_path} and weights from {weights_file_path}')
         sleep(3) # to watch log messages in the terminal
         self.model = self.load_model_from_json(json_file_path, weights_file_path)
 
