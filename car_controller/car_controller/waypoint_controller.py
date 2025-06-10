@@ -19,7 +19,7 @@ class WaypointController(Node):
         self.current_waypoint_index = 0
         self.radius = 2.0  # Radius in meters to consider reaching a waypoint
         self.num_waypoints = 9
-        self.num_laps = 10
+        self.num_laps = 50
         self.error = 0.0
 
         # QoS settings
