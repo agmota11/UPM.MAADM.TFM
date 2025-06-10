@@ -16,7 +16,7 @@ class SimCarController(Node):
     def __init__(self):
         super().__init__('sim_car_controller')
 
-        model_key = 'transformer_dql2'
+        model_key = 'transformer_dql3'
         model_info = get_model_info(model_key)
         json_file_path = model_info.json_path
         weights_file_path = model_info.weights_path

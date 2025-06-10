@@ -40,6 +40,11 @@ def get_model_info(name):
             model_name='transformer',
             weights_name='dql_transformer_20250610_161241.h5'
         ),
+        'transformer_dql3': ModelInfo(
+            base_path=BASE_PATH,
+            model_name='transformer',
+            weights_name='dql_transformer_20250610_164428.h5'
+        ),
         'transformer_with_positional_encoding': ModelInfo(
             base_path=BASE_PATH,
             model_name='transformer_with_positional_encoding',

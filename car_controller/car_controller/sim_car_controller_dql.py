@@ -78,7 +78,7 @@ class SimCarControllerDql(Node):
                 layer.trainable = True
                 break
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-6, clipnorm=1.0)
+        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-7, clipnorm=1.0)
         model.compile(optimizer=optimizer, loss='mse')
         self.get_logger().info("Model loaded, all layers frozen except the last Dense.")
         return model
