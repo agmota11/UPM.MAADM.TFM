@@ -19,7 +19,7 @@ class WaypointController(Node):
         self.current_waypoint_index = 0
         self.radius = 2.0  # Radius in meters to consider reaching a waypoint
         self.num_waypoints = 9
-        self.num_laps = 50
+        self.num_laps = 1
         self.error = 0.0
 
         # QoS settings
@@ -143,14 +143,8 @@ class WaypointController(Node):
         current_index = self.current_waypoint_index % len(self.waypoints)
         current_waypoint = self.waypoints[current_index]
 
-        dist_to_next_wp = self.calculate_distance(
-            self.car_lat, self.car_lon,
-            self.waypoints[(current_index + 1) % len(self.waypoints)][0],
-            self.waypoints[(current_index + 1) % len(self.waypoints)][1]
-        )
-
         # Add 2 times the distance to the next waypoint
-        self.error = (lateral_error + 0.005 * dist_to_next_wp) / 100.0
+        self.error = lateral_error
         error_msg = Float32()
         error_msg.data = float(self.error)
         self.error_publisher.publish(error_msg)

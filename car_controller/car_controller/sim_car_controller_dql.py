@@ -33,13 +33,13 @@ class SimCarControllerDql(Node):
 
         # DQL parameters
         self.gamma = 0.99
-        self.epsilon = 0.05
-        self.epsilon_min = 0.05
+        self.epsilon = 0.1
+        self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
         self.batch_size = 64
         self.memory = deque(maxlen=10000)
         self.train_freq = 5
-        self.target_update_freq = 100
+        self.target_update_freq = 300
         self.train_step = 0
 
         # ROS2 subscriptions and publishers
@@ -94,7 +94,9 @@ class SimCarControllerDql(Node):
         self.latest_gps = msg
 
     def error_callback(self, msg):
-        self.latest_error = msg.data
+        error = float(msg.data)
+        self.latest_error = (error ** 0.1) / 100.0 
+        # self.get_logger().info(f"Latest error: {self.latest_error:.4f}")
 
     def build_ackermann_msg(self, velocity_in_km_s, steering_angle):
         velocity_meters_per_second = velocity_in_km_s / 3.6
@@ -138,7 +140,7 @@ class SimCarControllerDql(Node):
             self.cmd_publisher.publish(self.build_ackermann_msg(self.car_velocity, 0.0))
             self.counter -= 1
             return
-    
+
         if not self.waypoints:
             self.get_logger().warn('No waypoints available for prediction.')
             self.cmd_publisher.publish(self.build_ackermann_msg(0.0, 0.0))
@@ -159,8 +161,8 @@ class SimCarControllerDql(Node):
         self.last_state = state
         self.last_action = action
 
-        if len(self.memory) < self.batch_size * 15:
-            return 
+        if len(self.memory) < self.batch_size * 20:
+            return
 
         # Train DQL
         if len(self.memory) >= self.batch_size and self.train_step % self.train_freq == 0:
@@ -185,7 +187,7 @@ class SimCarControllerDql(Node):
         for i in range(self.batch_size):
             target = rewards[i]
             if not dones[i]:
-                target += self.gamma * np.amax(next_q[i])
+                target += self.gamma * next_q[i][0]
             target_q[i][0] = target
         self.model.fit(states, target_q, epochs=1, verbose=0)
 

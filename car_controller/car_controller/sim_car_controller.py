@@ -16,14 +16,24 @@ class SimCarController(Node):
     def __init__(self):
         super().__init__('sim_car_controller')
 
-        model_key = 'transformer_dql4'
+        model_key = 'transformer_dql_alt'
         model_info = get_model_info(model_key)
         json_file_path = model_info.json_path
         weights_file_path = model_info.weights_path
+        dql_network_model = model_info.dql_network_model
+        dql_network_weights = model_info.dql_network_weights
         
         self.get_logger().info(f'Loading {model_key} from {json_file_path} and weights from {weights_file_path}')
         sleep(3) # to watch log messages in the terminal
         self.model = self.load_model_from_json(json_file_path, weights_file_path)
+
+        self.dql_network = None
+        self.action_space = [-0.1, -0.05, -0.025, 0.0, 0.025, 0.05, 0.1]
+
+        # Load DQL network if specified
+        if dql_network_model and dql_network_weights:
+            self.get_logger().info(f'Loading DQL network model and weights for {model_key}')
+            self.dql_network = self.load_model_from_json(dql_network_model, dql_network_weights)
 
         self.counter = 20
         self.max_steering_angle = 0.4
@@ -121,6 +131,14 @@ class SimCarController(Node):
         input_data = tf.convert_to_tensor([local_waypoints_flattened], dtype=tf.float32)
         pred = self.model.predict(input_data)
         predicted_steering_angle = float(pred[0][0])
+        
+        # Use DQL network to refine the steering angle prediction
+        if self.dql_network:
+            dql_pred = self.dql_network.predict(input_data)
+            action_index = np.argmax(dql_pred[0])
+            delta = self.action_space[action_index]
+            predicted_steering_angle += delta
+
         predicted_steering_angle = max(min(predicted_steering_angle, self.max_steering_angle), -self.max_steering_angle)
 
         # Publish the predicted steering angle

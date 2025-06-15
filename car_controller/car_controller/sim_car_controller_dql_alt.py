@@ -14,9 +14,9 @@ from pyproj import Geod
 from car_controller.models import get_model_info
 import datetime
 
-class SimCarControllerDql(Node):
+class SimCarControllerDqlAlt(Node):
     def __init__(self):
-        super().__init__('sim_car_controller_dql')
+        super().__init__('sim_car_controller_dql_alt')
 
         model_info = get_model_info('transformer')
         json_file_path = model_info.json_path
@@ -25,6 +25,8 @@ class SimCarControllerDql(Node):
         self.get_logger().info(f'Loading {model_info.model_name} from {json_file_path} and weights from {weights_file_path}')
         sleep(3)
         self.model = self.load_model_from_json(json_file_path, weights_file_path)
+
+        self.action_space = [-0.1, -0.05, -0.025, 0.0, 0.025, 0.05, 0.1]
 
         # Q-learning networks
         self.q_network = self.build_q_network()
@@ -43,8 +45,6 @@ class SimCarControllerDql(Node):
         self.train_freq = 5
         self.target_update_freq = 100
         self.train_step = 0
-
-        self.action_space = [-0.1, -0.05, -0.025, 0.0, 0.025, 0.05, 0.1]
 
         self.subscription_waypoints = self.create_subscription(
             Float32MultiArray, '/waypoints', self.waypoints_callback, 10)
@@ -132,6 +132,7 @@ class SimCarControllerDql(Node):
             return
 
         if self.counter > 0:
+            self.get_logger().warning("Initial steps")
             self.cmd_publisher.publish(self.build_ackermann_msg(self.car_velocity, 0.0))
             self.counter -= 1
             return
@@ -177,6 +178,11 @@ class SimCarControllerDql(Node):
 
     def save_model(self):
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        q_json = self.q_network.to_json()
+        q_json_path = f"/home/agmota/ros2_ws/UPM.MAADM.TFM/models/dql_qnetwork.json"
+        with open(q_json_path, "w") as json_file:
+            json_file.write(q_json)
+        self.get_logger().info(f"Saved Q-network architecture to {q_json_path}")
         q_path = f"/home/agmota/ros2_ws/UPM.MAADM.TFM/weights/dql_qnetwork_{timestamp}.h5"
         self.q_network.save_weights(q_path)
         self.get_logger().info(f"Saved Q-network to {q_path}")
@@ -194,7 +200,7 @@ def calculate_local_coordinates(lat, lon, waypoints):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = SimCarControllerDql()
+    node = SimCarControllerDqlAlt()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
