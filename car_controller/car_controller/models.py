@@ -35,36 +35,6 @@ def get_model_info(name):
         'transformer_dql': ModelInfo(
             base_path=BASE_PATH,
             model_name='transformer',
-            weights_name='dql_transformer_20250608_170153.h5'
-        ),
-        'transformer_dql2': ModelInfo(
-            base_path=BASE_PATH,
-            model_name='transformer',
-            weights_name='dql_transformer_20250610_161241.h5'
-        ),
-        'transformer_dql3': ModelInfo(
-            base_path=BASE_PATH,
-            model_name='transformer',
-            weights_name='dql_transformer_20250610_164428.h5'
-        ),
-        'transformer_dql4': ModelInfo(
-            base_path=BASE_PATH,
-            model_name='transformer',
-            weights_name='dql_transformer_20250610_180523.h5'
-        ), 
-        'transformer_dql5': ModelInfo(
-            base_path=BASE_PATH,
-            model_name='transformer',
-            weights_name='dql_transformer_20250611_185009.h5'
-        ),
-        'transformer_dql6': ModelInfo(
-            base_path=BASE_PATH,
-            model_name='transformer',
-            weights_name='dql_transformer_20250611_215432.h5'
-        ),
-        'transformer_dql7': ModelInfo(
-            base_path=BASE_PATH,
-            model_name='transformer',
             weights_name='dql_transformer_20250611_221010.h5'
         ),
         'transformer_dql_alt': ModelInfo(
