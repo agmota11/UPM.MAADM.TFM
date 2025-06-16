@@ -21,8 +21,11 @@ setup(
     entry_points={
         'console_scripts': [
             'car_state_logger = car_controller.car_state_logger:main',
+            'car_state_logger_insia = car_controller.car_state_logger_insia:main',
             'waypoint_controller = car_controller.waypoint_controller:main',
+            'waypoint_controller_insia = car_controller.waypoint_controller_insia:main',
             'sim_car_controller = car_controller.sim_car_controller:main',
+            'sim_car_controller_insia = car_controller.sim_car_controller_insia:main',
             'sim_car_controller_rf = car_controller.sim_car_controller_rf:main',
             'sim_car_controller_xgb = car_controller.sim_car_controller_xgb:main',
             'sim_car_controller_dql = car_controller.sim_car_controller_dql:main',

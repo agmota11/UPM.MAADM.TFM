@@ -10,6 +10,7 @@
   <depend>rclpy</depend>
   <depend>eufs_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>insia_msg</depend>
   <depend>tf_transformations</depend>
 
   <exec_depend>ros2launch</exec_depend>
