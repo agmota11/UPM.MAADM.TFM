@@ -29,19 +29,19 @@ class CarStateLogger(Node):
 
         self.subscription_telemetry = self.create_subscription(
             Telemetry,
-            '/telemetry',
+            '/imiev/Telemetry',
             self.telemetry_callback,
             qos
         )
-        self.subscription_telemetry2 = self.create_subscription(
-            Telemetry2,
-            '/telemetry2',
-            self.telemetry2_callback,
+        self.subscription_gps = self.create_subscription(
+            NavSatFix,
+            '/fix',
+            self.gps_callback,
             qos
         )
 
         self.latest_telemetry = None
-        self.latest_telemetry2 = None
+        self.latest_gps = None
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.output_file = os.path.join(DATA_BASE_DIRECTORY, f'car_log_{timestamp}.jsonl')
@@ -53,13 +53,12 @@ class CarStateLogger(Node):
         self.latest_telemetry = msg
         self.try_log()
 
-    def telemetry2_callback(self, msg: Telemetry2):
-        self.latest_telemetry2 = msg
-        self.try_log()
+    def gps_callback(self, msg):
+        self.latest_gps = msg
 
     def try_log(self):
         if (self.latest_telemetry is None 
-            or self.latest_telemetry2 is None):
+            or self.latest_gps is None):
             return
 
         timestamp = self.extract_timestamp()
@@ -89,29 +88,27 @@ class CarStateLogger(Node):
             self.log_buffer = []
 
         self.latest_telemetry = None
-        self.latest_telemetry2 = None
+        self.latest_gps = None
 
     def extract_timestamp(self):
-        stamp = self.latest_telemetry.header.stamp
-        return int(stamp.sec * 1e9 + stamp.nanosec) // 1_000_000  # ms
+        # Use local system time in milliseconds since epoch
+        return int(datetime.now().timestamp() * 1000)
 
     def calculate_speed(self):
         # Use Telemetry speed (already in m/s)
         return self.latest_telemetry.speed
 
     def calculate_yaw(self):
-        # Use Telemetry2 yaw (already in radians)
-        return self.latest_telemetry2.yaw
+        return 0
 
     def extract_gps(self):
         # Use Telemetry2 latitude/longitude, altitude not available, set to 0.0
-        return self.latest_telemetry2.latitude, self.latest_telemetry2.longitude, 0.0
+        return self.latest_gps.latitude, self.latest_gps.longitude, self.latest_gps.altitude
 
     def get_steering_angle(self):
         # Use Telemetry steering (in radians)
         return self.latest_telemetry.steering
 
-    
     def destroy_node(self):
         if self.log_buffer:
             with open(self.output_file, "a") as f:

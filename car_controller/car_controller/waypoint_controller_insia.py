@@ -33,7 +33,7 @@ class WaypointController(Node):
         # Subscriber to GPS data
         self.subscription_gps = self.create_subscription(
             NavSatFix,
-            '/gps',
+            '/fix',
             self.gps_callback,
             qos
         )
@@ -41,7 +41,7 @@ class WaypointController(Node):
         # Subscribe to /cmd for steering angle TODO: UPDATE TOPIC
         self.subscription_cmd = self.create_subscription(
             Telemetry,
-            '/cmd',
+            '/imiev/Telemetry',
             self.cmd_callback,
             qos
         )

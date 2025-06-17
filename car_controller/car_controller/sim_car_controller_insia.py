@@ -49,13 +49,13 @@ class SimCarController(Node):
         # Subscriber to /gps topic
         self.subscription_gps = self.create_subscription(
             NavSatFix,
-            '/gps',
+            '/fix',
             self.gps_callback,
             10
         )
 
         # Publisher to /cmd topic TODO: UPDATE TOPIC
-        self.cmd_publisher = self.create_publisher(PetConduccion, '/cmd', 10)
+        self.cmd_publisher = self.create_publisher(PetConduccion, '/imiev/TeleOperacion', 10)
 
         # Timer to publish constant velocity and zero steering angle
         self.timer = self.create_timer(0.1, self.timer_callback)
