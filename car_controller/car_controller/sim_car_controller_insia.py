@@ -36,7 +36,7 @@ class SimCarController(Node):
             self.dql_network = self.load_model_from_json(dql_network_model, dql_network_weights)
 
         self.counter = 20
-        self.max_steering_angle = 0.4
+        self.max_steering_angle = 300
 
         # Subscriber to /waypoints topic
         self.subscription_waypoints = self.create_subscription(
