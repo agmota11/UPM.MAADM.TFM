@@ -16,7 +16,7 @@ class SimCarController(Node):
     def __init__(self):
         super().__init__('sim_car_controller_insia')
 
-        model_key = 'transformer'
+        model_key = 'transformer_insia'
         model_info = get_model_info(model_key)
         json_file_path = model_info.json_path
         weights_file_path = model_info.weights_path
@@ -83,6 +83,10 @@ class SimCarController(Node):
         msg = PetConduccion()
         msg.steering = steering_angle
         msg.speed = velocity_in_km_m
+
+        msg.b_steering = True
+        msg.b_brake = True
+        msg.b_throttle = True
 
         return msg
 

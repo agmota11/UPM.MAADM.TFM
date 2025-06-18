@@ -16,7 +16,7 @@ class WaypointController(Node):
 
         # Load waypoints from the CSV file
         self.get_logger().info('Loading waypoints...')
-        self.waypoints = self.load_waypoints('/home/agmota/ros2_ws/UPM.MAADM.TFM/data/datasets/waypoints_small_track.csv')
+        self.waypoints = self.load_waypoints('/home/agmota/ros2_ws/UPM.MAADM.TFM/data/datasets/waypoints.csv')
         self.current_waypoint_index = 0
         self.radius = 2.0  # Radius in meters to consider reaching a waypoint
         self.num_waypoints = 9
@@ -33,7 +33,7 @@ class WaypointController(Node):
         # Subscriber to GPS data
         self.subscription_gps = self.create_subscription(
             NavSatFix,
-            '/fix',
+            '/imiev/gps/fix',
             self.gps_callback,
             qos
         )

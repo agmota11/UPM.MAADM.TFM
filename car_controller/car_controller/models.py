@@ -31,7 +31,12 @@ def get_model_info(name):
             base_path=BASE_PATH,
             model_name='transformer',
             weights_name='best_transformer_20250604_181401.h5'
-        ),        
+        ),    
+        'transformer_insia': ModelInfo(
+            base_path=BASE_PATH,
+            model_name='transformer',
+            weights_name='best_transformer_20250618_165820.h5'
+        ),       
         'transformer_dql': ModelInfo(
             base_path=BASE_PATH,
             model_name='transformer',
