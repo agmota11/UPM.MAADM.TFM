@@ -16,7 +16,7 @@ class SimCarController(Node):
     def __init__(self):
         super().__init__('sim_car_controller_insia')
 
-        model_key = 'transformer_dql7'
+        model_key = 'transformer'
         model_info = get_model_info(model_key)
         json_file_path = model_info.json_path
         weights_file_path = model_info.weights_path
@@ -49,7 +49,7 @@ class SimCarController(Node):
         # Subscriber to /gps topic
         self.subscription_gps = self.create_subscription(
             NavSatFix,
-            '/fix',
+            '/imiev/gps/fix',
             self.gps_callback,
             10
         )

@@ -35,7 +35,7 @@ class CarStateLogger(Node):
         )
         self.subscription_gps = self.create_subscription(
             NavSatFix,
-            '/fix',
+            '/imiev/gps/fix',
             self.gps_callback,
             qos
         )

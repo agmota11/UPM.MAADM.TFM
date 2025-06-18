@@ -30,6 +30,7 @@ setup(
             'sim_car_controller_xgb = car_controller.sim_car_controller_xgb:main',
             'sim_car_controller_dql = car_controller.sim_car_controller_dql:main',
             'sim_car_controller_dql_alt = car_controller.sim_car_controller_dql_alt:main',
+            'sim_car_controller_pid = car_controller.sim_car_controller_pid:main',
         ],
     },
 )
